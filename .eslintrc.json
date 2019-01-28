@@ -1,0 +1,28 @@
+{
+    "extends": ["eslint:recommended", "node-style-guide"],
+    "env": {
+        "node": true,
+        "es6": true,
+        "mocha": true
+    },
+    "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": 2018
+    },
+    "rules": {
+        "no-const-assign": "warn",
+        "no-this-before-super": "warn",
+        "no-undef": "warn",
+        "no-unreachable": "warn",
+        "no-unused-vars": "warn",
+        "constructor-super": "warn",
+        "valid-typeof": "warn",
+        "indent": ["warn", 4],
+        "space-after-keywords": "off",
+        "keyword-spacing": [2, {"before": true, "after": true}],
+        "max-len": "off",
+        "eol-last": "off",
+        "object-curly-spacing": "off",
+        "no-console": "off"
+    }
+}
