@@ -1,0 +1,19 @@
+{
+    "connections": [
+        {
+            "host": "localhost",
+            "tlsEnabled": true,
+            "port": "7194",
+            "nick": "weatherbot",
+            "channels": [
+                {
+                    "name": "#public-channel"
+                },
+                {
+                    "name": "#secret-channel",
+                    "key": "hunter2"
+                }
+            ]
+        }
+    ]
+}
