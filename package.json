@@ -9,10 +9,11 @@
   "author": "VirtualWolf <virtualwolf@virtualwolf.org>",
   "license": "ISC",
   "dependencies": {
-    "node-fetch": "^2.3.0"
+    "moment": "^2.24.0",
+    "node-fetch": "^2.6.0"
   },
   "devDependencies": {
-    "eslint": "^5.12.1",
+    "eslint": "^5.16.0",
     "eslint-config-node-style-guide": "^3.0.0"
   }
 }
