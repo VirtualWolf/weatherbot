@@ -1,5 +1,5 @@
 import WeatherBot from './lib/weatherbot';
-const config = require(process.argv[2] || './config.json');
+const config = require(process.argv[2] || '../config.json');
 
 config.connections.forEach((c: any) => {
     new WeatherBot({
