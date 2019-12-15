@@ -1,5 +1,5 @@
-import * as net from 'net';
-import * as tls from 'tls';
+import { Socket } from 'net';
+import { TLSSocket } from 'tls';
 import * as moment from 'moment';
 import { weatherListener } from './listeners/weather';
 
@@ -16,7 +16,7 @@ export default class WeatherBot {
     private tlsEnabled: boolean;
     private nick: string;
     private channels: Channels;
-    private client: net.Socket | tls.TLSSocket
+    private client: Socket | TLSSocket
 
     constructor({host, port, tlsEnabled, nick, channels}: {host: string, port: number, tlsEnabled: boolean, nick: string, channels: Channels}) {
         this.host = host;
@@ -31,8 +31,8 @@ export default class WeatherBot {
 
         this.client = this.tlsEnabled
             // @ts-ignore
-            ? new tls.TLSSocket()
-            : new net.Socket();
+            ? new TLSSocket()
+            : new Socket();
 
         this.client.connect(this.port, this.host, () => {
             this.sendInitialConnectionMessages();
