@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "module": "commonjs",
+        "strict": true,
+        "target": "ES2019",
+    },
+    "exclude": [
+        "node_modules",
+        "**/*.test.ts"
+    ]
+}

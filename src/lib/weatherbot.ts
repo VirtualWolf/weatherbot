@@ -1,10 +1,24 @@
-const net = require('net');
-const tls = require('tls');
-const fetch = require('node-fetch');
-const moment = require('moment');
+import * as net from 'net';
+import * as tls from 'tls';
+import * as moment from 'moment';
+import { weatherListener } from './listeners/weather';
 
-module.exports = class WeatherBot {
-    constructor({host, port, tlsEnabled, nick, channels}) {
+interface Channel {
+    name: string;
+    key?: string;
+}
+
+interface Channels extends Array<Channel> {}
+
+export default class WeatherBot {
+    private host: string;
+    private port: number;
+    private tlsEnabled: boolean;
+    private nick: string;
+    private channels: Channels;
+    private client: net.Socket | tls.TLSSocket
+
+    constructor({host, port, tlsEnabled, nick, channels}: {host: string, port: number, tlsEnabled: boolean, nick: string, channels: Channels}) {
         this.host = host;
         this.port = port
             ? port
@@ -16,6 +30,7 @@ module.exports = class WeatherBot {
         this.channels = channels;
 
         this.client = this.tlsEnabled
+            // @ts-ignore
             ? new tls.TLSSocket()
             : new net.Socket();
 
@@ -61,16 +76,10 @@ module.exports = class WeatherBot {
         });
     }
 
-    async sendMessage({type = 'PRIVMSG', messageTarget = '', message}) {
-        logMessage('DEBUG', `Sending message: ${type + ' ' + messageTarget + ' ' + message}`);
-
-        this.client.write(`${type} ${messageTarget} ${message}\n`);
-    }
-
-    async parseMessage({data}) {
+    async parseMessage({data}: {data: string}) {
         logMessage('DEBUG', `Received message: ${data}`);
 
-        const lines = data.split(/\n/).filter(line => line !== '');
+        const lines = data.split(/\n/).filter((line: string) => line !== '');
 
         for (const line of lines) {
             logMessage('DEBUG', `Processing line: ${line}`);
@@ -91,41 +100,40 @@ module.exports = class WeatherBot {
         }
     }
 
-    async handlePing({pingTarget}) {
+    async handlePing({pingTarget}: {pingTarget: string}) {
         await this.sendMessage({
             type: 'PONG',
             message: pingTarget.slice(1),
         });
     }
 
-    async handlePrivMsg({messageSource, messageTarget, messageText}) {
-        if (messageText.match(/^:!weather/)) {
-            await this.getWeather({
-                location: 'outdoor',
-                messageTarget,
-            });
+    async handlePrivMsg({messageSource, messageTarget, messageText}: {messageSource: string, messageTarget: string, messageText: string}) {
+        const responses = await Promise.all([
+            weatherListener(messageText),
+        ]);
 
-            await this.getWeather({
-                location: 'indoor',
-                messageTarget,
-            });
+        for (const response of responses) {
+            for (const line of response) {
+                this.sendMessage({
+                    messageTarget,
+                    message: line,
+                });
+            }
         }
     }
 
-    async getWeather({location, messageTarget}) {
-        const prettyLocation = location.charAt(0).toUpperCase() + location.slice(1);
+    async sendMessage({type = 'PRIVMSG', messageTarget = '', message}: {type?: string, messageTarget?: string, message?: string}) {
+        if (!message) {
+            return;
+        }
 
-        const res = await fetch(`https://virtualwolf.org/rest/weather/locations/${location}`);
-        const json = await res.json();
+        logMessage('DEBUG', `Sending message: ${type + ' ' + messageTarget + ' ' + message}`);
 
-        this.sendMessage({
-            messageTarget,
-            message: `:${prettyLocation}: ${json.temperature}˚ & ${json.humidity}%`,
-        });
+        this.client.write(`${type} ${messageTarget} ${message}\n`);
     }
 };
 
-function logMessage(level, message) {
+function logMessage(level: string, message: string) {
     const timestamp = moment().format('YYYY-MM-DD HH:mm:ss.SSS');
     const loggedMessage = `[${timestamp}] [${level}] ${message.trim()}`;
 
