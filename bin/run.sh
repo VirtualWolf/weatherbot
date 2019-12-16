@@ -5,6 +5,7 @@ if [[ $# -eq 0  ]] ; then
 fi
 
 docker run \
+    --detach \
     --restart unless-stopped \
     --volume $1:/opt/service/config.json \
     --name weatherbot \
