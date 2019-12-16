@@ -10,10 +10,12 @@
   "author": "VirtualWolf <virtualwolf@virtualwolf.org>",
   "license": "ISC",
   "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
     "moment": "^2.24.0",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
+    "@types/cheerio": "^0.22.15",
     "@types/node-fetch": "^2.5.4",
     "eslint": "^6.7.2",
     "eslint-config-node-style-guide": "^3.0.0",

@@ -17,5 +17,5 @@ const generateWeatherMessage = async (location: string) => {
     const res = await fetch(`https://virtualwolf.org/rest/weather/locations/${location}`);
     const { temperature, humidity } = await res.json();
 
-    return `:${prettyLocation}: ${temperature}˚ & ${humidity}%`;
+    return `${prettyLocation}: ${temperature}˚ & ${humidity}%`;
 }

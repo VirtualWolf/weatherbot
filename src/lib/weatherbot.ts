@@ -1,7 +1,8 @@
 import { Socket } from 'net';
 import { TLSSocket } from 'tls';
-import * as moment from 'moment';
 import { weatherListener } from './listeners/weather';
+import { tootListener } from './listeners/toot';
+import { logMessage } from './logMessage';
 
 interface Channel {
     name: string;
@@ -91,7 +92,9 @@ export default class WeatherBot {
             }
 
             if (line.match(/PRIVMSG/)) {
-                const [messageSource, messageType, messageTarget, messageText] = line.split(' ');
+                const split = line.split(' ');
+                const [messageSource, messageType, messageTarget] = split;
+                const messageText = split.slice(3).join(' ');
 
                 await this.handlePrivMsg({
                     messageSource, messageTarget, messageText,
@@ -110,13 +113,14 @@ export default class WeatherBot {
     async handlePrivMsg({messageSource, messageTarget, messageText}: {messageSource: string, messageTarget: string, messageText: string}) {
         const responses = await Promise.all([
             weatherListener(messageText),
+            tootListener(messageText),
         ]);
 
         for (const response of responses) {
             for (const line of response) {
                 this.sendMessage({
                     messageTarget,
-                    message: line,
+                    message: ':' + line,
                 });
             }
         }
@@ -132,14 +136,3 @@ export default class WeatherBot {
         this.client.write(`${type} ${messageTarget} ${message}\n`);
     }
 };
-
-function logMessage(level: string, message: string) {
-    const timestamp = moment().format('YYYY-MM-DD HH:mm:ss.SSS');
-    const loggedMessage = `[${timestamp}] [${level}] ${message.trim()}`;
-
-    if (level === 'DEBUG') {
-        process.env.DEBUG ? console.log(loggedMessage) : null;
-    } else {
-        console.log(loggedMessage);
-    }
-}
