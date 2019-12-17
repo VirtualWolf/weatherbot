@@ -1,5 +1,5 @@
-import { Socket } from 'net';
-import { TLSSocket } from 'tls';
+import * as net from 'net';
+import * as tls from 'tls';
 import { weatherListener } from './listeners/weather';
 import { tootListener } from './listeners/toot';
 import { logMessage } from './logMessage';
@@ -17,7 +17,7 @@ export default class WeatherBot {
     private tlsEnabled: boolean;
     private nick: string;
     private channels: Channels;
-    private client: Socket | TLSSocket
+    private client: net.Socket | tls.TLSSocket
 
     constructor({host, port, tlsEnabled, nick, channels}: {host: string, port: number, tlsEnabled: boolean, nick: string, channels: Channels}) {
         this.host = host;
@@ -31,20 +31,15 @@ export default class WeatherBot {
         this.channels = channels;
 
         this.client = this.tlsEnabled
-            // @ts-ignore
-            ? new TLSSocket()
-            : new Socket();
+            ? tls.connect({host: this.host, port: this.port}, () => this.sendInitialConnectionMessages())
+            : net.connect({host: this.host, port: this.port}, () => this.sendInitialConnectionMessages());
 
-        this.client.connect(this.port, this.host, () => {
-            this.sendInitialConnectionMessages();
-        });
-
-        this.client.on('data', async (buffer) => {
+        this.client.on('data', async (buffer: Buffer) => {
             const data = buffer.toString();
             await this.parseMessage({data});
         });
 
-        this.client.on('timeout', function() {
+        this.client.on('timeout', () => {
             logMessage('ERROR', `Connection to ${host} timed out`);
         });
 
