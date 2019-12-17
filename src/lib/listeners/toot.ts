@@ -29,9 +29,7 @@ export async function tootListener(messageText: string) {
                 }
             }
 
-            return tootArray
-                .filter(item => item !== '')
-                .map(item => '| ' + item);
+            return tootArray.filter(item => item !== '');
         } catch (err) {
             logMessage('ERROR', `Error retrieving toot: ${err.message} (${toot[0]})`);
             return ['Error retrieving toot: ' + err.message];

@@ -35,8 +35,7 @@ export default class WeatherBot {
             : net.connect({host: this.host, port: this.port}, () => this.sendInitialConnectionMessages());
 
         this.client.on('data', async (buffer: Buffer) => {
-            const data = buffer.toString();
-            await this.parseMessage({data});
+            await this.parseMessage(buffer.toString());
         });
 
         this.client.on('timeout', () => {
@@ -54,8 +53,18 @@ export default class WeatherBot {
     }
 
     sendInitialConnectionMessages() {
-        this.sendMessage({type: 'NICK', message: this.nick});
-        this.sendMessage({type: 'USER', message: `${this.nick} 0 * :${this.nick}`});
+        // https://modern.ircdocs.horse/#nick-message
+        this.sendMessage({
+            type: 'NICK',
+            message: this.nick,
+        });
+
+        // https://modern.ircdocs.horse/#user-message
+        this.sendMessage({
+            type: 'USER',
+            message: `${this.nick} 0 * :${this.nick}`,
+        });
+
         logMessage('INFO', `Connected to ${this.host}:${this.port}`);
 
         this.joinChannels();
@@ -63,16 +72,17 @@ export default class WeatherBot {
 
     joinChannels() {
         this.channels.forEach(channel => {
-            const key = channel.key
-                ? ' ' + channel.key
-                : '';
+            // https://modern.ircdocs.horse/#join-message
+            this.sendMessage({
+                type: 'JOIN',
+                message: `${channel.name}${channel.key ? channel.key : ''}`,
+            });
 
-            this.sendMessage({type: 'JOIN', message: `${channel.name}${key}`});
             logMessage('INFO', `Joined ${channel.name}`);
         });
     }
 
-    async parseMessage({data}: {data: string}) {
+    async parseMessage(data: string) {
         logMessage('DEBUG', `Received message: ${data}`);
 
         const lines = data.split(/\n/).filter((line: string) => line !== '');
@@ -80,32 +90,33 @@ export default class WeatherBot {
         for (const line of lines) {
             logMessage('DEBUG', `Processing line: ${line}`);
 
+            // https://tools.ietf.org/html/rfc1459#section-4.6.2
             if (line.match(/^PING/)) {
                 const [messageType, pingTarget] = line.split(' ');
 
-                await this.handlePing({pingTarget});
+                await this.handlePing(pingTarget);
             }
 
+            // https://modern.ircdocs.horse/#privmsg-message
             if (line.match(/PRIVMSG/)) {
                 const split = line.split(' ');
                 const [messageSource, messageType, messageTarget] = split;
                 const messageText = split.slice(3).join(' ');
 
-                await this.handlePrivMsg({
-                    messageSource, messageTarget, messageText,
-                });
+                await this.handlePrivMsg(messageSource, messageTarget, messageText);
             }
         }
     }
 
-    async handlePing({pingTarget}: {pingTarget: string}) {
+    async handlePing(pingTarget: string) {
+        // https://tools.ietf.org/html/rfc2812#section-3.7.3
         await this.sendMessage({
             type: 'PONG',
             message: pingTarget.slice(1),
         });
     }
 
-    async handlePrivMsg({messageSource, messageTarget, messageText}: {messageSource: string, messageTarget: string, messageText: string}) {
+    async handlePrivMsg(messageSource: string, messageTarget: string, messageText: string) {
         const responses = await Promise.all([
             weatherListener(messageText),
             tootListener(messageText),
