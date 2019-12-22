@@ -7,6 +7,7 @@ import { logMessage } from './logMessage';
 interface Channel {
     name: string;
     key?: string;
+    disabledListeners?: string[];
 }
 
 interface Channels extends Array<Channel> {}
@@ -117,12 +118,19 @@ export default class WeatherBot {
     }
 
     async handlePrivMsg(messageSource: string, messageTarget: string, messageText: string) {
+        const channelSettings = this.channels.find((channel) => messageTarget === channel.name);
+
+        // First check to see if each listener has been disabled in config.json, then run it if not.
         const responses = await Promise.all([
-            weatherListener(messageText),
-            tootListener(messageText),
+            !channelSettings?.disabledListeners?.includes('weather') ? weatherListener(messageText) : null,
+            !channelSettings?.disabledListeners?.includes('toot') ? tootListener(messageText) : null,
         ]);
 
         for (const response of responses) {
+            if (!response) {
+                continue;
+            }
+
             for (const line of response) {
                 this.sendMessage({
                     messageTarget,
@@ -137,7 +145,7 @@ export default class WeatherBot {
             return;
         }
 
-        logMessage('DEBUG', `Sending message: ${type + ' ' + messageTarget + ' ' + message}`);
+        logMessage('DEBUG', `Sending message: ${type} ${messageTarget} ${message}`);
 
         this.client.write(`${type} ${messageTarget} ${message}\n`);
     }
