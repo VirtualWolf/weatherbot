@@ -7,7 +7,7 @@ import { logMessage } from './logMessage';
 interface Channel {
     name: string;
     key?: string;
-    disabledListeners?: string[];
+    disableListeners?: string[];
 }
 
 interface Channels extends Array<Channel> {}
@@ -32,8 +32,8 @@ export default class WeatherBot {
         this.channels = channels;
 
         this.client = this.tlsEnabled
-            ? tls.connect({host: this.host, port: this.port}, () => this.sendInitialConnectionMessages())
-            : net.connect({host: this.host, port: this.port}, () => this.sendInitialConnectionMessages());
+            ? tls.connect({host: this.host, port: this.port}, () => this.sendClientRegistration())
+            : net.connect({host: this.host, port: this.port}, () => this.sendClientRegistration());
 
         this.client.on('data', async (buffer: Buffer) => {
             await this.parseMessage(buffer.toString());
@@ -53,7 +53,7 @@ export default class WeatherBot {
         });
     }
 
-    sendInitialConnectionMessages() {
+    sendClientRegistration() {
         // https://modern.ircdocs.horse/#nick-message
         this.sendMessage({
             type: 'NICK',
@@ -67,20 +67,6 @@ export default class WeatherBot {
         });
 
         logMessage('INFO', `Connected to ${this.host}:${this.port}`);
-
-        this.joinChannels();
-    }
-
-    joinChannels() {
-        this.channels.forEach(channel => {
-            // https://modern.ircdocs.horse/#join-message
-            this.sendMessage({
-                type: 'JOIN',
-                message: `${channel.name}${channel.key ? channel.key : ''}`,
-            });
-
-            logMessage('INFO', `Joined ${channel.name}`);
-        });
     }
 
     async parseMessage(data: string) {
@@ -95,23 +81,43 @@ export default class WeatherBot {
             if (line.match(/^PING/)) {
                 const [messageType, pingTarget] = line.split(' ');
 
-                await this.handlePing(pingTarget);
+                this.handlePing(pingTarget);
+                return;
+            }
+
+            const split = line.split(' ');
+            const [messageSource, messageType, messageTarget] = split;
+            const messageText = split.slice(3).join(' ');
+
+            // https://modern.ircdocs.horse/#rplwelcome-001
+            if (messageType === '001') {
+                this.joinChannels();
+                return;
             }
 
             // https://modern.ircdocs.horse/#privmsg-message
-            if (line.match(/PRIVMSG/)) {
-                const split = line.split(' ');
-                const [messageSource, messageType, messageTarget] = split;
-                const messageText = split.slice(3).join(' ');
-
+            if (messageType === 'PRIVMSG') {
                 await this.handlePrivMsg(messageSource, messageTarget, messageText);
+                return;
             }
         }
     }
 
-    async handlePing(pingTarget: string) {
+    joinChannels() {
+        this.channels.forEach(async channel => {
+            // https://modern.ircdocs.horse/#join-message
+            this.sendMessage({
+                type: 'JOIN',
+                message: `${channel.name}${channel.key ? ' ' + channel.key : ''}`,
+            });
+
+            logMessage('INFO', `Joined ${channel.name}`);
+        });
+    }
+
+    handlePing(pingTarget: string) {
         // https://tools.ietf.org/html/rfc2812#section-3.7.3
-        await this.sendMessage({
+        this.sendMessage({
             type: 'PONG',
             message: pingTarget.slice(1),
         });
@@ -122,8 +128,8 @@ export default class WeatherBot {
 
         // First check to see if each listener has been disabled in config.json, then run it if not.
         const responses = await Promise.all([
-            !channelSettings?.disabledListeners?.includes('weather') ? weatherListener(messageText) : null,
-            !channelSettings?.disabledListeners?.includes('toot') ? tootListener(messageText) : null,
+            !channelSettings?.disableListeners?.includes('weather') ? weatherListener(messageText) : null,
+            !channelSettings?.disableListeners?.includes('toot') ? tootListener(messageText) : null,
         ]);
 
         for (const response of responses) {
@@ -140,13 +146,15 @@ export default class WeatherBot {
         }
     }
 
-    async sendMessage({type = 'PRIVMSG', messageTarget = '', message}: {type?: string, messageTarget?: string, message?: string}) {
+    sendMessage({type = 'PRIVMSG', messageTarget = '', message}: {type?: string, messageTarget?: string, message?: string}) {
         if (!message) {
             return;
         }
 
-        logMessage('DEBUG', `Sending message: ${type} ${messageTarget} ${message}`);
+        const rawMessage = `${type} ${messageTarget} ${message}`;
 
-        this.client.write(`${type} ${messageTarget} ${message}\n`);
+        logMessage('DEBUG', `Sending message: ${rawMessage}`);
+
+        this.client.write(`${rawMessage}\n`, () => logMessage('DEBUG', `Message successfully sent: ${rawMessage}`));
     }
 };
