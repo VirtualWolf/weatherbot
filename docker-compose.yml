@@ -1,0 +1,7 @@
+version: '3.3'
+services:
+  bot:
+    image: virtualwolf/weatherbot:latest
+    restart: unless-stopped
+    volumes:
+      - ./config.json:/opt/service/config.json
