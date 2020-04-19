@@ -32,8 +32,8 @@ export default class WeatherBot {
         this.channels = channels;
 
         this.client = this.tlsEnabled
-            ? tls.connect({host: this.host, port: this.port}, () => this.sendClientRegistration())
-            : net.connect({host: this.host, port: this.port}, () => this.sendClientRegistration());
+            ? tls.connect({host: this.host, port: this.port, timeout: 180000}, () => this.sendClientRegistration())
+            : net.connect({host: this.host, port: this.port, timeout: 180000}, () => this.sendClientRegistration());
 
         this.client.on('data', async (buffer: Buffer) => {
             await this.parseMessage(buffer.toString());
@@ -41,6 +41,7 @@ export default class WeatherBot {
 
         this.client.on('timeout', () => {
             logMessage('ERROR', `Connection to ${host} timed out`);
+            this.client.end();
         });
 
         this.client.on('error', (e) => {
