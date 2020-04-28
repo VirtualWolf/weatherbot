@@ -40,17 +40,22 @@ export default class WeatherBot {
         });
 
         this.client.on('timeout', () => {
-            logMessage('ERROR', `Connection to ${host} timed out`);
+            logMessage('INFO', this.host, `Connection to ${host} timed out`);
             this.client.end();
         });
 
         this.client.on('error', (e) => {
-            logMessage('ERROR', `${e}`);
-
+            logMessage('ERROR', this.host, `${e}`);
         });
 
         this.client.on('close', (hadError) => {
-            logMessage('INFO', `Connection to ${host} closed`);
+            logMessage('INFO', this.host, `Connection to ${host} closed`);
+
+            try {
+                setTimeout(() => this.client.connect({host: this.host, port: this.port}, () => this.sendClientRegistration()), 60000);
+            } catch (err) {
+                logMessage('INFO', this.host, `Failed to reconnect to ${this.host}`);
+            }
         });
     }
 
@@ -67,16 +72,16 @@ export default class WeatherBot {
             message: `${this.nick} 0 * :${this.nick}`,
         });
 
-        logMessage('INFO', `Connected to ${this.host}:${this.port}`);
+        logMessage('INFO', this.host, `Connected to ${this.host}:${this.port}`);
     }
 
     async parseMessage(data: string) {
-        logMessage('DEBUG', `Received message: ${data}`);
+        logMessage('DEBUG', this.host, `Received message: ${data}`);
 
         const lines = data.split(/\n/).filter((line: string) => line !== '');
 
         for (const line of lines) {
-            logMessage('DEBUG', `Processing line: ${line}`);
+            logMessage('DEBUG', this.host, `Processing line: ${line}`);
 
             // https://tools.ietf.org/html/rfc1459#section-4.6.2
             if (line.match(/^PING/)) {
@@ -112,7 +117,7 @@ export default class WeatherBot {
                 message: `${channel.name}${channel.key ? ' ' + channel.key : ''}`,
             });
 
-            logMessage('INFO', `Joined ${channel.name}`);
+            logMessage('INFO', this.host, `Joined ${channel.name}`);
         });
     }
 
@@ -154,8 +159,8 @@ export default class WeatherBot {
 
         const rawMessage = `${type} ${messageTarget} ${message}`;
 
-        logMessage('DEBUG', `Sending message: ${rawMessage}`);
+        logMessage('DEBUG', this.host, `Sending message: ${rawMessage}`);
 
-        this.client.write(`${rawMessage}\n`, () => logMessage('DEBUG', `Message successfully sent: ${rawMessage}`));
+        this.client.write(`${rawMessage}\n`, () => logMessage('DEBUG', this.host, `Message successfully sent: ${rawMessage}`));
     }
 };

@@ -12,10 +12,14 @@ export async function weatherListener(messageText: string) {
 }
 
 const generateWeatherMessage = async (location: string) => {
-    const prettyLocation = location.charAt(0).toUpperCase() + location.slice(1);
+    try {
+        const prettyLocation = location.charAt(0).toUpperCase() + location.slice(1);
 
-    const res = await fetch(`https://virtualwolf.org/rest/weather/locations/${location}`);
-    const { temperature, humidity } = await res.json();
+        const res = await fetch(`https://virtualwolf.org/rest/weather/locations/${location}`);
+        const { temperature, humidity } = await res.json();
 
-    return `${prettyLocation}: ${temperature}˚ & ${humidity}%`;
+        return `${prettyLocation}: ${temperature}˚ & ${humidity}%`;
+    } catch (err) {
+        return `Error retrieving date for ${location}: ${err.message}`;
+    }
 }
