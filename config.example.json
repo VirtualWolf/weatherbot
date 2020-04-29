@@ -12,7 +12,7 @@
                 {
                     "name": "#secret-channel",
                     "key": "hunter2",
-                    "disabledListeners": ["toot", "weather"]
+                    "disableListeners": ["toot", "weather"]
                 }
             ]
         }
