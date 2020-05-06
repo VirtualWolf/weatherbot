@@ -78,7 +78,8 @@ export default class WeatherBot {
     async parseMessage(data: string) {
         logMessage('DEBUG', this.host, `Received message: ${data}`);
 
-        const lines = data.split(/\n/).filter((line: string) => line !== '');
+        // https://modern.ircdocs.horse/#client-to-server-protocol-structure
+        const lines = data.split(/\r\n/).filter((line: string) => line !== '');
 
         for (const line of lines) {
             logMessage('DEBUG', this.host, `Processing line: ${line}`);
@@ -161,6 +162,6 @@ export default class WeatherBot {
 
         logMessage('DEBUG', this.host, `Sending message: ${rawMessage}`);
 
-        this.client.write(`${rawMessage}\n`, () => logMessage('DEBUG', this.host, `Message successfully sent: ${rawMessage}`));
+        this.client.write(`${rawMessage}\r\n`, () => logMessage('DEBUG', this.host, `Message successfully sent: ${rawMessage}`));
     }
 };
