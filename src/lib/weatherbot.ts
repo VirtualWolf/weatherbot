@@ -89,7 +89,6 @@ export default class WeatherBot {
                 const [messageType, pingTarget] = line.split(' ');
 
                 this.handlePing(pingTarget);
-                return;
             }
 
             const split = line.split(' ');
@@ -99,13 +98,11 @@ export default class WeatherBot {
             // https://modern.ircdocs.horse/#rplwelcome-001
             if (messageType === '001') {
                 this.joinChannels();
-                return;
             }
 
             // https://modern.ircdocs.horse/#privmsg-message
             if (messageType === 'PRIVMSG') {
                 await this.handlePrivMsg(messageSource, messageTarget, messageText);
-                return;
             }
         }
     }
