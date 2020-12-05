@@ -79,7 +79,7 @@ export default class WeatherBot {
         logMessage('DEBUG', this.host, `Received message: ${data}`);
 
         // https://modern.ircdocs.horse/#client-to-server-protocol-structure
-        const lines = data.split(/\r\n/).filter((line: string) => line !== '');
+        const lines = data.split(/\r\n|\r|\n/).filter((line: string) => line !== '');
 
         for (const line of lines) {
             logMessage('DEBUG', this.host, `Processing line: ${line}`);
