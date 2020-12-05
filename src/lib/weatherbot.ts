@@ -97,26 +97,34 @@ export default class WeatherBot {
 
             // https://modern.ircdocs.horse/#rplwelcome-001
             if (messageType === '001') {
-                this.joinChannels();
+                this.channels.forEach(async channel => {
+                    this.joinChannel(channel.name, channel.key);
+                });
             }
 
             // https://modern.ircdocs.horse/#privmsg-message
             if (messageType === 'PRIVMSG') {
                 await this.handlePrivMsg(messageSource, messageTarget, messageText);
             }
+
+            if (messageType === 'KICK') {
+                logMessage('INFO', this.host, `Kicked from ${messageTarget}, rejoining in 10 seconds...`);
+
+                const thisChannel = this.channels.find(c => c.name === messageTarget);
+
+                setTimeout(() => this.joinChannel(messageTarget, thisChannel!.key), 10000);
+            }
         }
     }
 
-    joinChannels() {
-        this.channels.forEach(async channel => {
-            // https://modern.ircdocs.horse/#join-message
-            this.sendMessage({
-                type: 'JOIN',
-                message: `${channel.name}${channel.key ? ' ' + channel.key : ''}`,
-            });
-
-            logMessage('INFO', this.host, `Joined ${channel.name}`);
+    joinChannel(name: string, key?: string) {
+        // https://modern.ircdocs.horse/#join-message
+        this.sendMessage({
+            type: 'JOIN',
+            message: `${name}${key ? ' ' + key : ''}`,
         });
+
+        logMessage('INFO', this.host, `Joined ${name}`);
     }
 
     handlePing(pingTarget: string) {
