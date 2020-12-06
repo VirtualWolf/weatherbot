@@ -1,7 +1,9 @@
 import fetch from 'node-fetch';
 
-export async function weatherListener(messageText: string) {
-    if (messageText.match(/^:!weather/)) {
+export async function weatherListener(messageText: string, botName: string) {
+    const regexp = new RegExp(`${botName}: weather`);
+
+    if (messageText.match(regexp)) {
         return [
             await generateWeatherMessage('outdoor'),
             await generateWeatherMessage('indoor')

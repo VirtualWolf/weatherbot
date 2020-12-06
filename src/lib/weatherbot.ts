@@ -140,7 +140,7 @@ export default class WeatherBot {
 
         // First check to see if each listener has been disabled in config.json, then run it if not.
         const responses = await Promise.all([
-            !channelSettings?.disableListeners?.includes('weather') ? weatherListener(messageText) : null,
+            !channelSettings?.disableListeners?.includes('weather') ? weatherListener(messageText, this.nick) : null,
             !channelSettings?.disableListeners?.includes('toot') ? tootListener(messageText) : null,
         ]);
 
