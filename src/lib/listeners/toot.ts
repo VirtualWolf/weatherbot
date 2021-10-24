@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
-import { logMessage } from '../logMessage';
 
 export async function tootListener(messageText: string) {
     const toot = messageText.match(/(https:\/\/.*)\/@(?:[A-Za-z0-9_]+)\/(\d+)/);
@@ -11,6 +10,11 @@ export async function tootListener(messageText: string) {
 
         try {
             const res = await fetch(`${mastodonInstanceUrl}/api/v1/statuses/${statusId}`);
+
+            if (!res.ok) {
+                throw new Error(`Received status ${res.status}`);
+            }
+
             const json = await res.json();
 
             if (json.error) {
@@ -29,7 +33,9 @@ export async function tootListener(messageText: string) {
                 }
             }
 
-            return tootArray.filter(item => item !== '');
+            return tootArray
+                .filter(item => item !== '')
+                .map(item => `> ${item}`);
         } catch (err) {
             return ['Error retrieving toot: ' + err.message];
         }

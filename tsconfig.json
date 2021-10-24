@@ -5,6 +5,8 @@
         "module": "commonjs",
         "strict": true,
         "target": "ES2019",
+        "resolveJsonModule" : true,
+        "useUnknownInCatchVariables": false
     },
     "exclude": [
         "node_modules",

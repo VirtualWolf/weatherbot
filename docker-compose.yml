@@ -2,6 +2,7 @@ version: '3.3'
 services:
   bot:
     container_name: weatherbot
+    build: .
     image: virtualwolf/weatherbot:latest
     restart: unless-stopped
     volumes:

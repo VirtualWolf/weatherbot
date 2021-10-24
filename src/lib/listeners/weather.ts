@@ -1,27 +1,44 @@
 import fetch from 'node-fetch';
+const config = require(process.argv[2] || '../../../config.json');
+
+interface Location {
+    name: string;
+    url: string;
+}
+
+interface WeatherData {
+    temperature: number;
+    humidity: number;
+}
 
 export async function weatherListener(messageText: string, botName: string) {
     const regexp = new RegExp(`${botName}: weather`);
 
     if (messageText.match(regexp)) {
-        return [
-            await generateWeatherMessage('outdoor'),
-            await generateWeatherMessage('indoor')
-        ];
+        return Promise.all(
+            config.weather.map(async (location: Location) => await generateWeatherMessage(location))
+        );
     } else {
         return [];
     }
 }
 
-const generateWeatherMessage = async (location: string) => {
+const generateWeatherMessage = async ({name, url}: {name: string, url: string}) => {
     try {
-        const prettyLocation = location.charAt(0).toUpperCase() + location.slice(1);
+        const res = await fetch(url);
 
-        const res = await fetch(`https://virtualwolf.org/rest/weather/locations/${location}`);
-        const { temperature, humidity } = await res.json();
+        if (!res.ok) {
+            throw new Error(`Status was ${res.status}`);
+        }
 
-        return `${prettyLocation}: ${temperature}˚ & ${humidity}%`;
+        const json = (await res.json()) as WeatherData;
+
+        if (json.temperature && json.humidity) {
+            return `${name}: ${json.temperature}˚ & ${json.humidity}%`;
+        } else {
+            throw new Error(`Temperature or humidity values not found. Got: ${JSON.stringify(json)}`);
+        }
     } catch (err) {
-        return `Error retrieving date for ${location}: ${err.message}`;
+        return `Error retrieving date for ${url}: ${err.message}`;
     }
 }

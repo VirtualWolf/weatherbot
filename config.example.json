@@ -1,9 +1,9 @@
 {
     "connections": [
         {
-            "host": "localhost",
+            "host": "irc.example.com",
             "tlsEnabled": true,
-            "port": "7194",
+            "port": 6697,
             "nick": "weatherbot",
             "channels": [
                 {
@@ -15,6 +15,16 @@
                     "disableListeners": ["toot", "weather"]
                 }
             ]
+        }
+    ],
+    "weather": [
+        {
+            "name": "Outdoor",
+            "url": "https://example.com/rest/weather/locations/outdoor"
+        },
+        {
+            "name": "Indoor",
+            "url": "https://example.com/rest/weather/locations/indoor"
         }
     ]
 }
