@@ -3,6 +3,7 @@ import * as tls from 'tls';
 import { weatherListener } from './listeners/weather';
 import { tootListener } from './listeners/toot';
 import { logMessage } from './logMessage';
+import { tweetListener } from './listeners/tweet';
 
 interface Channel {
     name: string;
@@ -145,6 +146,9 @@ export default class WeatherBot {
                 : null,
             !channelSettings?.disableListeners?.includes('toot')
                 ? tootListener(messageText)
+                : null,
+            !channelSettings?.disableListeners?.includes('tweet')
+                ? tweetListener(messageText)
                 : null,
         ]);
 

@@ -1,5 +1,5 @@
 # weatherbot
-An IRC bot written without any IRC library, to read temperatures and fetch the text of Mastodon toots. Primarily a learning experience to play with the IRC protocol.
+An IRC bot written without any IRC library, to read temperatures, fetch the text of Mastodon toots, and the text of tweets. Primarily a learning experience to play with the IRC protocol.
 
 ```
 18:58 <@virtualwolf> weatherbot: weather
@@ -11,7 +11,7 @@ An IRC bot written without any IRC library, to read temperatures and fetch the t
 
 ## Configuration
 
-Requires a file called `config.json` at the root of the repository with the following format to specify an IRC server and a list of channels to join, and optionally a list of HTTP endpoints to fetch weather data from:
+Requires a file called `config.json` at the root of the repository with the following format to specify an IRC server and a list of channels to join, and optionally a list of HTTP endpoints to fetch weather data from and a Twitter bearer token from [developer.twitter.com](https://developer.twitter.com) to programtically read tweet details:
 ```json
 {
     "connections": [
@@ -29,7 +29,8 @@ Requires a file called `config.json` at the root of the repository with the foll
             "name": "Outdoor",
             "url": "https://example.com/rest/weather/locations/outdoor"
         }
-    ]
+    ],
+    "twitterBearerToken": "AAAAAAAAAAAAAAAAAAAAABJkVwEAAAAAnNIgvTvkRBGW[...]"
 }
 ```
 
@@ -61,7 +62,7 @@ Additional options can be specified to join a private or secret channel, as well
                 {
                     "name": "#secret-channel",
                     "key": "hunter2",
-                    "disableListeners": ["toot", "weather"]
+                    "disableListeners": ["toot", "weather", "tweet"]
                 }
             ]
         }
@@ -75,7 +76,8 @@ Additional options can be specified to join a private or secret channel, as well
             "name": "Indoor",
             "url": "https://example.com/weather/locations/indoor"
         }
-    ]
+    ],
+    "twitterBearerToken": "AAAAAAAAAAAAAAAAAAAAABJkVwEAAAAAnNIgvTvkRBGW[...]"
 }
 ```
 

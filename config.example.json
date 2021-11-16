@@ -12,7 +12,7 @@
                 {
                     "name": "#secret-channel",
                     "key": "hunter2",
-                    "disableListeners": ["toot", "weather"]
+                    "disableListeners": ["toot", "weather", "tweet"]
                 }
             ]
         }
@@ -26,5 +26,6 @@
             "name": "Indoor",
             "url": "https://example.com/rest/weather/locations/indoor"
         }
-    ]
+    ],
+    "twitterBearerToken": "AAAAAAAAAAAAAAAAAAAAABJkVwEAAAAAnNIgvTvkRBGW[...]"
 }
