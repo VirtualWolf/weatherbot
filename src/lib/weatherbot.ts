@@ -4,6 +4,7 @@ import { weatherListener } from './listeners/weather';
 import { tootListener } from './listeners/toot';
 import { logMessage } from './logMessage';
 import { tweetListener } from './listeners/tweet';
+import { restartListener } from './listeners/restart';
 
 interface Channel {
     name: string;
@@ -141,6 +142,9 @@ export default class WeatherBot {
 
         // First check to see if each listener has been disabled in config.json, then run it if not.
         const responses = await Promise.all([
+            !channelSettings?.disableListeners?.includes('restart')
+                ? restartListener(messageText, this.nick)
+                : null,
             !channelSettings?.disableListeners?.includes('weather')
                 ? weatherListener(messageText, this.nick)
                 : null,
