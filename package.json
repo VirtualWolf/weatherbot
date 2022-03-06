@@ -13,7 +13,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
     "moment": "^2.29.1",
-    "node-fetch": "^3.2.1"
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.31",
