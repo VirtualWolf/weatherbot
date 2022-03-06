@@ -18,7 +18,7 @@ export async function tweetListener(messageText: string) {
                 throw new Error(`Received status ${res.status}`);
             }
 
-            const json = await res.json();
+            const json: any = await res.json();
 
             if (json.errors) {
                 throw new Error(json.errors[0].detail);

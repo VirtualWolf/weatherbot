@@ -1,4 +1,4 @@
-FROM node:14.15.1-alpine AS base
+FROM node:16.14.0-alpine AS base
 
 FROM base AS build
 RUN mkdir -p /opt/build
