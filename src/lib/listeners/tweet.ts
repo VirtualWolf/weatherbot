@@ -1,6 +1,26 @@
 import fetch from 'node-fetch';
 const config = require(process.argv[2] || '../../../config.json');
 
+interface Media {
+    media_key: string;
+    type: 'photo' | 'video';
+    url?: string;
+}
+
+interface Error {
+    detail: string;
+}
+
+interface Tweet {
+    data: {
+        text: string;
+    };
+    includes?: {
+        media: Media[];
+    }
+    errors?: Error[];
+}
+
 export async function tweetListener(messageText: string) {
     const tweet = messageText.match(/https:\/\/twitter\.com\/(?:[A-Za-z0-9_]+)\/status\/(\d+)/);
 
@@ -18,7 +38,7 @@ export async function tweetListener(messageText: string) {
                 throw new Error(`Received status ${res.status}`);
             }
 
-            const json: any = await res.json();
+            const json: Tweet = await res.json();
 
             if (json.errors) {
                 throw new Error(json.errors[0].detail);
@@ -27,9 +47,11 @@ export async function tweetListener(messageText: string) {
             const tweetArray: string[] = json.data.text.split('\n');
 
             if (json.includes?.media) {
-                for (const media of json.includes.media) {
-                    tweetArray.push(media.url);
-                }
+                json.includes.media.forEach((item: Media) => {
+                    if (item.url) {
+                        tweetArray.push(item.url);
+                    }
+                });
             }
 
             return tweetArray
