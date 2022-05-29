@@ -15,7 +15,7 @@ export async function tootListener(messageText: string) {
                 throw new Error(`Received status ${res.status}`);
             }
 
-            const json: any = await res.json();
+            const json = await res.json();
 
             if (json.error) {
                 throw new Error(json.error);
