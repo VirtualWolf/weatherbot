@@ -17,9 +17,15 @@
             ]
         }
     ],
-    "weather": {
-        "url": "http://example.local/api",
-        "locations": ["outdoor", "indoor"]
-    },
+    "weather": [
+        {
+            "name": "Outdoor",
+            "url": "https://example.com/rest/weather/locations/outdoor"
+        },
+        {
+            "name": "Indoor",
+            "url": "https://example.com/rest/weather/locations/indoor"
+        }
+    ],
     "twitterBearerToken": "AAAAAAAAAAAAAAAAAAAAABJkVwEAAAAAnNIgvTvkRBGW[...]"
 }

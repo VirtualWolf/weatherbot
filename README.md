@@ -4,12 +4,9 @@ An IRC bot written without any IRC library, to read temperatures, fetch the text
 ```
 18:58 <@virtualwolf> weatherbot: weather
 18:58 < weatherbot> Outdoor: 18.8˚ & 60%
-18:58 <@virtualwolf> https://botsin.space/@wikipediahaiku/107896522546850445
-18:58 < weatherbot> > Momentarily,
-18:58 < weatherbot> > the locomotive comes back,
-18:58 < weatherbot> > much to their delight
-18:58 <@virtualwolf> https://twitter.com/Horse_ebooks/status/228032106859749377
-18:58 < weatherbot> > Unfortunately, as you probably already know, people
+18:58 <@virtualwolf> https://aus.social/@virtualwolf/107142233345319503
+18:58 < weatherbot> Beanie is very pooped out after his walk.
+18:58 < weatherbot> https://aus.social/media/GuZHQLn5xzmaNy_wxD0
 ```
 
 ## Configuration
@@ -27,25 +24,24 @@ Requires a file called `config.json` at the root of the repository with the foll
             ]
         }
     ],
-    "weather": {
-        "url": "http://example.local/api",
-        "locations": ["outdoor"]
-    },
+    "weather": [
+        {
+            "name": "Outdoor",
+            "url": "https://example.com/rest/weather/locations/outdoor"
+        }
+    ],
     "twitterBearerToken": "AAAAAAAAAAAAAAAAAAAAABJkVwEAAAAAnNIgvTvkRBGW[...]"
 }
 ```
 
 By default, TLS is not enabled and the bot will try to connect on port 6667.
 
-The bot expects the weather URL to return its data in the following format:
+The bot expects the weather URL(s) to return their data in the following format:
 
 ```json
 {
-    "outdoor": {
-        "temperature": 18.8,
-        "humidity": 60
-    },
-    [...additional locations specified in `weather.locations` in config.json]
+    "temperature": 18.8,
+    "humidity": 60
 }
 ```
 
@@ -71,10 +67,16 @@ Additional options can be specified to join a private or secret channel, as well
             ]
         }
     ],
-    "weather": {
-        "url": "http://fourbee/api",
-        "locations": ["outdoor", "indoor"]
-    },
+    "weather": [
+        {
+            "name": "Outdoor",
+            "url": "https://example.com/weather/locations/outdoor"
+        },
+        {
+            "name": "Indoor",
+            "url": "https://example.com/weather/locations/indoor"
+        }
+    ],
     "twitterBearerToken": "AAAAAAAAAAAAAAAAAAAAABJkVwEAAAAAnNIgvTvkRBGW[...]"
 }
 ```
