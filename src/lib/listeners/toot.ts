@@ -29,7 +29,7 @@ export async function tootListener(messageText: string) {
 
             if (json.media_attachments) {
                 for (const attachment of json.media_attachments) {
-                    tootArray.push(attachment.text_url);
+                    tootArray.push(attachment.url);
                 }
             }
 
