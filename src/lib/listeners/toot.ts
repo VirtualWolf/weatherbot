@@ -5,32 +5,36 @@ export async function tootListener(messageText: string) {
     const toot = messageText.match(/(https:\/\/.*)\/@(?:[A-Za-z0-9_]+)\/(\d+)/);
 
     if (toot) {
-        const mastodonInstanceUrl = toot[1];
-        const statusId = toot[2];
+        const url = toot[0];
 
         try {
-            const res = await fetch(`${mastodonInstanceUrl}/api/v1/statuses/${statusId}`);
+            const res = await fetch(url);
 
             if (!res.ok) {
                 throw new Error(`Received status ${res.status}`);
             }
 
-            const json = await res.json();
+            const $ = cheerio.load(await res.text());
 
-            if (json.error) {
-                throw new Error(json.error);
-            }
+            const tootArray: string[] = [];
 
-            const $ = cheerio.load(json.content);
-            $('p').prepend('\n');
-            $('br').prepend('\n');
-
-            const tootArray = $('p').text().split('\n');
-
-            if (json.media_attachments) {
-                for (const attachment of json.media_attachments) {
-                    tootArray.push(attachment.url);
+            const text = $('meta[property=og\\:description]').attr('content')?.split('\n');
+            text?.forEach(line => {
+                if (!line.match(/^Attached: \d+/)) {
+                    tootArray.push(line);
                 }
+            });
+
+            const attachments = $('meta[property=og\\:image], meta[property=og\\:audio], meta[property=og\\:video]');
+
+            if (attachments.length > 0) {
+                attachments.each((index, element) => {
+                    const url = $(element).attr('content');
+
+                    if (url) {
+                        tootArray.push(url);
+                    }
+                });
             }
 
             return tootArray
