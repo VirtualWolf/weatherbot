@@ -1,4 +1,4 @@
-FROM node:16.15.0-buster-slim AS base
+FROM node:18.17.1-buster-slim AS base
 
 FROM base AS build
 RUN mkdir -p /opt/build
@@ -16,4 +16,4 @@ COPY --chown=node:node package*.json ./
 RUN npm install --only=production && rm -rf /home/node/.npm
 COPY --chown=node:node --from=build /opt/build/dist /opt/service/dist
 
-CMD npm start
+CMD ["node", "dist/app.js"]
