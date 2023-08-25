@@ -6,6 +6,7 @@ config.connections.forEach((c: any) => {
         host: c.host,
         port: c.port,
         tlsEnabled: c.tlsEnabled,
+        serverPassword: c.password,
         nick: c.nick || 'weatherbot',
         channels: c.channels,
     });

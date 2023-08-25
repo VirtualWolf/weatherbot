@@ -18,11 +18,12 @@ export default class WeatherBot {
     private host: string;
     private port: number;
     private tlsEnabled: boolean;
+    private serverPassword: string;
     private nick: string;
     private channels: Channels;
     private client: net.Socket | tls.TLSSocket
 
-    constructor({host, port, tlsEnabled, nick, channels}: {host: string, port: number, tlsEnabled: boolean, nick: string, channels: Channels}) {
+    constructor({host, port, tlsEnabled, serverPassword, nick, channels}: {host: string, port: number, tlsEnabled: boolean, serverPassword: string, nick: string, channels: Channels}) {
         this.host = host;
         this.port = port
             ? port
@@ -30,6 +31,7 @@ export default class WeatherBot {
                 ? 6697
                 : 6667;
         this.tlsEnabled = tlsEnabled;
+        this.serverPassword = serverPassword;
         this.nick = nick;
         this.channels = channels;
 
@@ -62,6 +64,13 @@ export default class WeatherBot {
     }
 
     sendClientRegistration() {
+        if (this.serverPassword) {
+            this.sendMessage({
+                type: 'PASS',
+                message: this.serverPassword,
+            });
+        }
+
         // https://modern.ircdocs.horse/#nick-message
         this.sendMessage({
             type: 'NICK',
