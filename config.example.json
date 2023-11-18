@@ -3,6 +3,7 @@
         {
             "host": "irc.example.com",
             "tlsEnabled": true,
+            "rejectUnauthorized": true,
             "serverPassword": "my-very-secure-password",
             "port": 6697,
             "nick": "weatherbot",

@@ -17,12 +17,13 @@ export default class WeatherBot {
     private host: string;
     private port: number;
     private tlsEnabled: boolean;
+    private rejectUnauthorized: boolean;
     private serverPassword: string;
     private nick: string;
     private channels: Channels;
     private client: net.Socket | tls.TLSSocket
 
-    constructor({host, port, tlsEnabled, serverPassword, nick, channels}: {host: string, port: number, tlsEnabled: boolean, serverPassword: string, nick: string, channels: Channels}) {
+    constructor({host, port, tlsEnabled, rejectUnauthorized = true, serverPassword, nick, channels}: {host: string, port: number, tlsEnabled: boolean, rejectUnauthorized: boolean, serverPassword: string, nick: string, channels: Channels}) {
         this.host = host;
         this.port = port
             ? port
@@ -30,12 +31,13 @@ export default class WeatherBot {
                 ? 6697
                 : 6667;
         this.tlsEnabled = tlsEnabled;
+        this.rejectUnauthorized = rejectUnauthorized;
         this.serverPassword = serverPassword;
         this.nick = nick;
         this.channels = channels;
 
         this.client = this.tlsEnabled
-            ? tls.connect({host: this.host, port: this.port, timeout: 180000}, () => this.sendClientRegistration())
+            ? tls.connect({host: this.host, port: this.port, rejectUnauthorized: this.rejectUnauthorized, timeout: 180000}, () => this.sendClientRegistration())
             : net.connect({host: this.host, port: this.port, timeout: 180000}, () => this.sendClientRegistration());
 
         this.client.on('data', async (buffer: Buffer) => {

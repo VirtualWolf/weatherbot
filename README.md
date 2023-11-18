@@ -44,7 +44,7 @@ The bot expects the weather URL(s) to return their data in the following format:
 }
 ```
 
-Additional options can be specified to use a server password or join a private or secret channel, as well as enabling TLS and changing the port number, and disabling the weather, Mastodon toot, or restart listeners:
+Additional options can be specified to use a server password or join a private or secret channel, as well as enabling TLS, not verifying self-signed certificates, changing the port number, and disabling the weather, Mastodon toot, or restart listeners:
 
 ```json
 {
@@ -52,6 +52,7 @@ Additional options can be specified to use a server password or join a private o
         {
             "host": "irc.example.com",
             "tlsEnabled": true,
+            "rejectAuthorized": false,
             "port": 6697,
             "serverPassword": "my-very-secure-password",
             "nick": "my-cool-bot",
