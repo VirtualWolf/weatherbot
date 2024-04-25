@@ -1,4 +1,4 @@
-FROM node:18.17.1-buster-slim AS base
+FROM node:20.12.2-alpine AS base
 
 FROM base AS build
 RUN mkdir -p /opt/build

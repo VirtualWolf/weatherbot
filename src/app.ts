@@ -1,3 +1,4 @@
+import { subscribeToBroker } from './lib/mqtt';
 import WeatherBot from './lib/weatherbot';
 const config = require(process.argv[2] || '../config.json');
 
@@ -12,3 +13,7 @@ config.connections.forEach((c: any) => {
         channels: c.channels,
     });
 });
+
+if (config.mqtt) {
+    subscribeToBroker();
+}

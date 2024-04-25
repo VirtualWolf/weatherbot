@@ -1,9 +1,9 @@
-import fetch from 'node-fetch';
+import { render } from "ejs";
 const config = require(process.argv[2] || '../../../config.json');
 
 interface Location {
-    name: string;
     url: string;
+    template: string;
 }
 
 interface WeatherData {
@@ -23,9 +23,9 @@ export async function weatherListener(messageText: string, botName: string) {
     }
 }
 
-const generateWeatherMessage = async ({name, url}: {name: string, url: string}) => {
+const generateWeatherMessage = async (location: Location) => {
     try {
-        const res = await fetch(url);
+        const res = await fetch(location.url);
 
         if (!res.ok) {
             throw new Error(`Status was ${res.status}`);
@@ -34,11 +34,11 @@ const generateWeatherMessage = async ({name, url}: {name: string, url: string}) 
         const json = (await res.json()) as WeatherData;
 
         if (json.temperature && json.humidity) {
-            return `${name}: ${json.temperature}˚ & ${json.humidity}%`;
+            return render(location.template, json);
         } else {
             throw new Error(`Temperature or humidity values not found. Got: ${JSON.stringify(json)}`);
         }
     } catch (err) {
-        return `Error retrieving date for ${url}: ${err.message}`;
+        return `Error retrieving date for ${location.url}: ${err.message}`;
     }
 }

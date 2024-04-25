@@ -14,19 +14,47 @@
                 {
                     "name": "#secret-channel",
                     "key": "hunter2",
-                    "disableListeners": ["toot", "weather", "restart"]
+                    "disableListeners": ["toot", "weather", "restart", "mqtt"]
                 }
             ]
         }
     ],
     "weather": [
         {
-            "name": "Outdoor",
-            "url": "https://example.com/rest/weather/locations/outdoor"
+            "url": "https://example.com/rest/weather/locations/outdoor",
+            "template": "Outdoor: <%= temperature %>°C & <%= humidity %>%"
         },
         {
-            "name": "Indoor",
-            "url": "https://example.com/rest/weather/locations/indoor"
+            "url": "https://example.com/rest/weather/locations/indoor",
+            "template": "Indoor: <%= temperature %>°C & <%= humidity %>%"
         }
-    ]
+    ],
+    "mqtt": {
+        "brokerAddress": "mqtt.example.com",
+        "brokerPort": 1884,
+        "dataTypes": {
+            "weather": [
+                {
+                    "topic": "home/outdoor/weather",
+                    "template": "Outdoor: <%= temperature.toFixed(1) %>°C & <%= Math.round(humidity) %>% humidity. Dew point is <%= dew_point.toFixed(1) %>°C. Atmospheric pressure is <%= Math.round(pressure) %> hPa."
+                },
+                {
+                    "topic": "home/indoor/weather",
+                    "template": "Indoor: <%= temperature.toFixed(1) %>°C & <%= Math.round(humidity) %>% humidity."
+                }
+            ],
+            "power": [
+                {
+                    "topic": "home/power",
+                    "template": "Consumption is <%= (home_usage/1000).toFixed(2) %>kW, solar generation is <%= solar_generation === 0 ? solar_generation : (solar_generation/1000).toFixed(2) %>kW. Current battery charge is <%= battery_charge_percentage === 100 ? battery_charge_percentage : battery_charge_percentage.toFixed(1) %>%."
+                }
+            ],
+            "airquality": [
+                {
+                    "topic": "home/outdoor/airquality",
+                    "template": "Outdoor: PM1.0 is <%= pm_1_0 %>, PM2.5 is <%= pm_2_5 %>, PM10 is <%= pm_10 %>."
+                }
+            ]
+        }
+    }
 }
