@@ -16,6 +16,23 @@ interface Channel {
 
 interface Channels extends Array<Channel> {}
 
+enum ClientMessage {
+    USER = 'USER',
+    PASS = 'PASS',
+    NICK = 'NICK',
+    JOIN = 'JOIN',
+    PONG = 'PONG',
+    PRIVMSG = 'PRIVMSG',
+}
+
+enum ServerMessage {
+    RPL_WELCOME = '001',
+    ERR_NICKNAMEINUSE = '433',
+    PING = 'PING',
+    PRIVMSG = 'PRIVMSG',
+    KICK = 'KICK',
+}
+
 export default class WeatherBot {
     private host: string;
     private port: number;
@@ -70,20 +87,20 @@ export default class WeatherBot {
     sendClientRegistration() {
         if (this.serverPassword) {
             this.sendMessage({
-                type: 'PASS',
+                type: ClientMessage.PASS,
                 message: this.serverPassword,
             });
         }
 
         // https://modern.ircdocs.horse/#nick-message
         this.sendMessage({
-            type: 'NICK',
+            type: ClientMessage.NICK,
             message: this.nick,
         });
 
         // https://modern.ircdocs.horse/#user-message
         this.sendMessage({
-            type: 'USER',
+            type: ClientMessage.USER,
             message: `${this.nick} 0 * :${this.nick}`,
         });
 
@@ -110,24 +127,49 @@ export default class WeatherBot {
             const [messageSource, messageType, messageTarget] = split;
             const messageText = split.slice(3).join(' ');
 
+            // The welcome message sent by the server after client registration
             // https://modern.ircdocs.horse/#rplwelcome-001
-            if (messageType === '001') {
+            if (messageType === ServerMessage.RPL_WELCOME) {
+                logMessage('INFO', this.host, messageText);
+
                 this.channels.forEach(async channel => {
                     this.joinChannel(channel.name, channel.key);
                 });
             }
 
+            // Returned when the bot tries to use a nickname that is already being used by someone
+            // https://modern.ircdocs.horse/#errnicknameinuse-433
+            if (messageType === ServerMessage.ERR_NICKNAMEINUSE) {
+                const originalNick = this.nick;
+                const newNick = `${this.nick}_`
+
+                logMessage('INFO', this.host, `Nickname "${this.nick}" already in use, temporarily changing nickname to ${newNick}`)
+
+                this.nick = newNick;
+
+                setTimeout(() => {
+                    logMessage('INFO', this.host, `Attempting to set nickname back to ${originalNick}...`)
+
+                    this.sendMessage({
+                        type: ClientMessage.NICK,
+                        message: originalNick,
+                    });
+
+                    this.nick = originalNick;
+                }, 180000);
+            }
+
             // https://modern.ircdocs.horse/#privmsg-message
-            if (messageType === 'PRIVMSG') {
+            if (messageType === ServerMessage.PRIVMSG) {
                 await this.handlePrivMsg(messageSource, messageTarget, messageText);
             }
 
-            if (messageType === 'KICK') {
-                logMessage('INFO', this.host, `Kicked from ${messageTarget}, rejoining in 10 seconds...`);
+            if (messageType === ServerMessage.KICK) {
+                logMessage('INFO', this.host, messageText);
 
                 const thisChannel = this.channels.find(c => c.name === messageTarget);
 
-                setTimeout(() => this.joinChannel(messageTarget, thisChannel!.key), 10000);
+                setTimeout(() => this.joinChannel(messageTarget, thisChannel?.key), 10000);
             }
         }
     }
@@ -135,7 +177,7 @@ export default class WeatherBot {
     joinChannel(name: string, key?: string) {
         // https://modern.ircdocs.horse/#join-message
         this.sendMessage({
-            type: 'JOIN',
+            type: ClientMessage.JOIN,
             message: `${name}${key ? ' ' + key : ''}`,
         });
 
@@ -145,7 +187,7 @@ export default class WeatherBot {
     handlePing(pingTarget: string) {
         // https://tools.ietf.org/html/rfc2812#section-3.7.3
         this.sendMessage({
-            type: 'PONG',
+            type: ClientMessage.PONG,
             message: pingTarget.slice(1),
         });
     }
@@ -188,10 +230,9 @@ export default class WeatherBot {
                 message: ':' + 'Something went wrong: ' + err,
             })
         }
-
     }
 
-    sendMessage({type = 'PRIVMSG', messageTarget = '', message}: {type?: string, messageTarget?: string, message?: string}) {
+    sendMessage({type = ClientMessage.PRIVMSG, messageTarget = '', message}: {type?: ClientMessage, messageTarget?: string, message?: string}) {
         if (!message) {
             return;
         }
