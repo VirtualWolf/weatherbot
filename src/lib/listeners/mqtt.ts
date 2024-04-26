@@ -1,5 +1,5 @@
 import { render } from 'ejs';
-import { dataTypes, latestMqttData } from "../mqtt";
+import { dataTypes, mqttData } from "../mqtt";
 
 export async function mqttListener(messageText: string, botName: string) {
     const regexp = new RegExp(`${botName}: (${dataTypes.join('|')})`, 'g');
@@ -10,7 +10,7 @@ export async function mqttListener(messageText: string, botName: string) {
 
         const dataType = matches[0][1];
 
-        latestMqttData[dataType].forEach(topicItem => {
+        mqttData[dataType].forEach(topicItem => {
             renderedOutput.push(render(topicItem.template, topicItem.data));
         });
 

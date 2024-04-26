@@ -74,7 +74,7 @@ Additional options can be specified to use a server password or join a private o
 
 # MQTT
 
-You can also have the bot connect to an MQTT broker to read data from an arbitrary topic or set of topics, and render the data appropriately. [EJS](https://ejs.co) is used instead of [Mustache](https://mustache.github.io) so the MQTT data can be reformatted as necessary.
+You can also have the bot connect to an MQTT broker to read JSON data from an arbitrary topic or set of topics, and render the data appropriately. [EJS](https://ejs.co) is used instead of [Mustache](https://mustache.github.io) so the MQTT data can be reformatted as necessary.
 
 Update `config.json` to include an `mqtt` block (the port defaults to 1883 if not specified):
 

@@ -5,21 +5,21 @@ const config = require(process.argv[2] || '../../config.json');
 interface SingleMqttDataType {
     topic: string;
     template: string;
-    data: any;
+    data?: any;
 }
 
 interface MqttData {
     [key: string]: SingleMqttDataType[]
 }
 
-export let latestMqttData: MqttData = {}
+export let mqttData: MqttData = {}
 export const dataTypes: string[] = [];
 export let subscribeToBroker: Function;
 
 if (config.mqtt) {
-    latestMqttData = config.mqtt.dataTypes;
+    mqttData = config.mqtt.dataTypes;
 
-    Object.keys(config.mqtt.dataTypes).forEach((type: string) => dataTypes.push(type));
+    Object.keys(mqttData).forEach((type: string) => dataTypes.push(type));
 
     subscribeToBroker = () => {
         const client = connect('tcp://' + config.mqtt.brokerAddress, {
@@ -29,23 +29,22 @@ if (config.mqtt) {
 
         const topics: string[] = [];
 
-        Object.keys(config.mqtt.dataTypes).forEach((type: string) => {
-            Object.values(config.mqtt.dataTypes[type]).forEach((type: any) => topics.push(type.topic));
-        });
+        dataTypes.forEach(type => Object.values(mqttData[type]).forEach(type => topics.push(type.topic)));
 
         client.subscribe(topics);
 
         client.on('message', async (topic, message) => {
-            Object.keys(config.mqtt.dataTypes).forEach((type: string) => {
-                const matchingDataType = config.mqtt.dataTypes[type]
-                    .find((item: any) => item.topic === topic);
+            dataTypes.forEach(dataType => {
+                const dataTypeIndex = mqttData[dataType].findIndex((item) => item.topic === topic);
 
-                if (matchingDataType) {
-                    const index = latestMqttData[type].findIndex(item => item.topic === topic);
+                if (dataTypeIndex !== -1) {
+                    try {
+                        const json = JSON.parse(message.toString());
 
-                    const json = JSON.parse(message.toString());
-
-                    latestMqttData[type][index].data = json;
+                        mqttData[dataType][dataTypeIndex].data = json;
+                    } catch (err) {
+                        log(`Error processing message "${message.toString()}" from topic ${topic}. Error was: ${err}`, 'ERROR')
+                    }
                 }
             });
         });
