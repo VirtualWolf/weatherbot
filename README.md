@@ -45,7 +45,7 @@ The bot expects the weather URL(s) to return their data in the following format:
 }
 ```
 
-Additional options can be specified to use a server password or join a private or secret channel, as well as enabling TLS, not verifying self-signed certificates, changing the port number, and disabling the weather, Mastodon toot, or restart listeners:
+Additional options can be specified to use a server password or join a private or secret channel, as well as enabling TLS, not verifying self-signed certificates, changing the port number, and disabling the weather, Mastodon toot, fact, or restart listeners:
 
 ```json
 {
@@ -70,6 +70,30 @@ Additional options can be specified to use a server password or join a private o
         }
     ]
 }
+```
+
+# Fact listener
+
+This is a very basic setup that uses a JSON file called `facts.json` in the root of the repository as a persistent datastore to store "facts" in the form of "<subject> is <something>":
+
+```
+22:08 <@virtualwolf> weatherbot: virtualwolf is a drummer
+22:08 < weatherbot> Thanks, I have made a note of this.
+22:09 <@virtualwolf> weatherbot: define virtualwolf
+22:09 < weatherbot> virtualwolf is a drummer.
+22:10 <@virtualwolf> weatherbot: virtualwolf is a drummer
+22:10 < weatherbot> This has already been noted.
+22:11 <@virtualwolf> weatherbot: virtualwolf is also a guitar player
+22:11 < weatherbot> Thanks, I have made a note of this.
+```
+
+Multiple facts can be saved against a given subject, and if more than one exists, a random one will be chosen when the `define` command is used.
+
+To forget a specific fact, use "forget that <subject> is <fact>":
+
+```
+22:11 <@virtualwolf> weatherbot: forget that virtualwolf is a drummer
+22:11 < weatherbot> I've forgotten that virtualwolf is a drummer.
 ```
 
 # MQTT

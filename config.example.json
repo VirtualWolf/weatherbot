@@ -14,7 +14,7 @@
                 {
                     "name": "#secret-channel",
                     "key": "hunter2",
-                    "disableListeners": ["toot", "weather", "restart", "mqtt"]
+                    "disableListeners": ["toot", "weather", "restart", "mqtt", "fact"]
                 }
             ]
         }

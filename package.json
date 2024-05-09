@@ -19,6 +19,7 @@
   "devDependencies": {
     "@types/cheerio": "^0.22.35",
     "@types/ejs": "^3.1.5",
+    "@types/node": "^20.12.11",
     "eslint-config-node-style-guide": "^3.0.0",
     "nodemon": "^3.1.0",
     "ts-node": "^10.9.2",

@@ -4,6 +4,7 @@ import { weatherListener } from './listeners/weather';
 import { mqttListener } from './listeners/mqtt';
 import { dataTypes } from './mqtt';
 import { tootListener } from './listeners/toot';
+import { factListener } from './listeners/fact';
 import { restartListener } from './listeners/restart';
 import { logMessage } from './logMessage';
 const config = require(process.argv[2] || '../../config.json');
@@ -210,6 +211,9 @@ export default class WeatherBot {
                 channelSettings?.disableListeners?.includes('toot')
                     ? null
                     : tootListener(messageText),
+                channelSettings?.disableListeners?.includes('fact')
+                    ? null
+                    : factListener(messageText, this.nick),
             ]);
 
             for (const response of responses) {
