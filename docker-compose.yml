@@ -6,4 +6,4 @@ services:
     restart: unless-stopped
     volumes:
       - ./config.json:/opt/service/config.json
-      - ${PWD}/facts.json:/opt/service/facts.json
+      - ./facts.json:/opt/service/facts.json
