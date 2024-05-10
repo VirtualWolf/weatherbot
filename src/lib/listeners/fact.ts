@@ -90,6 +90,8 @@ async function forgetFact({subject, fact}: {subject: string, fact: string}) {
         contents[subject] = contents[subject].filter(item => item !== fact);
 
         await writeDatabaseFile(contents);
+
+        return [`I have forgetten that ${subject} is ${fact}`];
     } catch (err) {
         return [`I don't know anything about that.`];
     }
