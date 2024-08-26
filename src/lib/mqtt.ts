@@ -41,7 +41,12 @@ if (config.mqtt) {
                     try {
                         const json = JSON.parse(message.toString());
 
-                        mqttData[dataType][dataTypeIndex].data = json;
+                        // Merge the existing data together with the new data, to handle the case where two
+                        // different types of data are being emitted on the same topic with different fields
+                        mqttData[dataType][dataTypeIndex].data = {
+                            ...mqttData[dataType][dataTypeIndex].data,
+                            ...json,
+                        };
                     } catch (err) {
                         log(`Error processing message "${message.toString()}" from topic ${topic}. Error was: ${err}`, 'ERROR')
                     }
