@@ -3,19 +3,12 @@ import * as tls from 'tls';
 import { weatherListener } from './listeners/weather';
 import { mqttListener } from './listeners/mqtt';
 import { dataTypes } from './mqtt';
-import { tootListener } from './listeners/toot';
+import { urlListener } from './listeners/url';
 import { factListener } from './listeners/fact';
 import { restartListener } from './listeners/restart';
 import { logMessage } from './logMessage';
+import { Channel } from '../app';
 const config = require(process.argv[2] || '../../config.json');
-
-interface Channel {
-    name: string;
-    key?: string;
-    disableListeners?: string[];
-}
-
-interface Channels extends Array<Channel> {}
 
 enum ClientMessage {
     USER = 'USER',
@@ -34,17 +27,17 @@ enum ServerMessage {
     KICK = 'KICK',
 }
 
-export default class WeatherBot {
+export class WeatherBot {
     private host: string;
     private port: number;
-    private tlsEnabled: boolean;
-    private rejectUnauthorized: boolean;
-    private serverPassword: string;
+    private tlsEnabled?: boolean;
+    private rejectUnauthorized?: boolean;
+    private serverPassword?: string;
     private nick: string;
-    private channels: Channels;
+    private channels: Channel[];
     private client: net.Socket | tls.TLSSocket
 
-    constructor({host, port, tlsEnabled, rejectUnauthorized = true, serverPassword, nick, channels}: {host: string, port: number, tlsEnabled: boolean, rejectUnauthorized: boolean, serverPassword: string, nick: string, channels: Channels}) {
+    constructor({host, port, tlsEnabled = false, rejectUnauthorized = true, serverPassword, nick, channels}: {host: string, port?: number, tlsEnabled?: boolean, rejectUnauthorized?: boolean, serverPassword?: string, nick: string, channels: Channel[]}) {
         this.host = host;
         this.port = port
             ? port
@@ -78,7 +71,7 @@ export default class WeatherBot {
             logMessage('INFO', this.host, `Connection to ${host} closed`);
 
             try {
-                setTimeout(() => this.client.connect({host: this.host, port: this.port}, () => this.sendClientRegistration()), 60000);
+                setTimeout(() => this.client.connect(this.port, this.host, () => this.sendClientRegistration()), 60000);
             } catch (err) {
                 logMessage('INFO', this.host, `Failed to reconnect to ${this.host}`);
             }
@@ -122,6 +115,13 @@ export default class WeatherBot {
                 const [messageType, pingTarget] = line.split(' ');
 
                 this.handlePing(pingTarget);
+            }
+
+            if (line.match(/^ERROR/)) {
+                const error = line.match(/^ERROR :(.*)$/)
+                logMessage('ERROR', this.host, error![1]);
+
+                this.client.end();
             }
 
             const split = line.split(' ');
@@ -208,9 +208,9 @@ export default class WeatherBot {
                 channelSettings?.disableListeners?.includes('mqtt') && config.mqtt
                     ? null
                     : mqttListener(messageText, this.nick),
-                channelSettings?.disableListeners?.includes('toot')
+                channelSettings?.disableListeners?.includes('url')
                     ? null
-                    : tootListener(messageText),
+                    : urlListener(messageText),
                 channelSettings?.disableListeners?.includes('fact')
                     ? null
                     : factListener(messageText, this.nick),

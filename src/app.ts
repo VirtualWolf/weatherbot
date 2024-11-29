@@ -1,9 +1,27 @@
 import { log } from './lib/logMessage';
 import { subscribeToBroker } from './lib/mqtt';
-import WeatherBot from './lib/weatherbot';
+import { WeatherBot } from './lib/weatherbot';
 const config = require(process.argv[2] || '../config.json');
 
-config.connections.forEach((c: any) => {
+type Listeners = 'fact' | 'mqtt' | 'restart' | 'url' | 'weather';
+
+export interface Channel {
+    name: string;
+    key?: string;
+    disableListeners?: Listeners[];
+}
+
+interface Connection {
+    host: string;
+    port?: number;
+    tlsEnabled?: boolean;
+    rejectUnauthorized?: boolean;
+    serverPassword?: string;
+    nick: string;
+    channels: Channel[];
+}
+
+config.connections.forEach((c: Connection) => {
     new WeatherBot({
         host: c.host,
         port: c.port,

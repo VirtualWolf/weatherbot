@@ -45,7 +45,7 @@ The bot expects the weather URL(s) to return their data in the following format:
 }
 ```
 
-Additional options can be specified to use a server password or join a private or secret channel, as well as enabling TLS, not verifying self-signed certificates, changing the port number, and disabling the weather, Mastodon toot, fact, or restart listeners:
+Additional options can be specified to use a server password or join a private or secret channel, as well as enabling TLS, not verifying self-signed certificates, changing the port number, and disabling the weather, URL, fact, or restart listeners:
 
 ```json
 {
@@ -64,7 +64,7 @@ Additional options can be specified to use a server password or join a private o
                 {
                     "name": "#secret-channel",
                     "key": "hunter2",
-                    "disableListeners": ["toot", "weather", "restart"]
+                    "disableListeners": ["url", "weather", "restart"]
                 }
             ]
         }
