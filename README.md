@@ -72,6 +72,18 @@ Additional options can be specified to use a server password or join a private o
 }
 ```
 
+# URL previews
+
+The bot can read the OpenGraph tags from a URL to show a preview:
+
+```
+20:23 <@virtualwolf> weatherbot: https://aus.social/@virtualwolf/113904270125475469
+20:23 < weatherbot> > Well, the southerly has certainly arrived with a vengeance. #SydneyWeatherTooting
+20:23 < weatherbot> > https://mediacdn.aus.social/media_attachments/files/113/904/270/104/532/889/original/490bfbdd2a0dffa2.jpeg
+```
+
+It includes a link to images so IRC clients like [The Lounge](https://thelounge.chat) can display them inline.
+
 # Fact listener
 
 This is a very basic setup that uses a JSON file called `facts.json` in the root of the repository as a persistent datastore to store "facts" in the form of "<subject> is <something>":

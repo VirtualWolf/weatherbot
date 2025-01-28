@@ -210,7 +210,7 @@ export class WeatherBot {
                     : mqttListener(messageText, this.nick),
                 channelSettings?.disableListeners?.includes('url')
                     ? null
-                    : urlListener(messageText),
+                    : urlListener(messageText, this.nick),
                 channelSettings?.disableListeners?.includes('fact')
                     ? null
                     : factListener(messageText, this.nick),

@@ -2,10 +2,11 @@ import * as linkify from "linkifyjs";
 import * as cheerio from 'cheerio';
 import { log } from "../logMessage";
 
-export async function urlListener(messageText: string) {
+export async function urlListener(messageText: string, botName: string) {
+    const regexp = new RegExp(`^:${botName}: `)
     const urls = linkify.find(messageText);
 
-    if (urls.length > 0) {
+    if (urls.length > 0 && messageText.match(regexp)) {
         let messageArray: string[] = [];
 
         for (const url of urls) {
