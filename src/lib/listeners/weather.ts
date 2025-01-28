@@ -12,7 +12,7 @@ interface WeatherData {
 }
 
 export async function weatherListener(messageText: string, botName: string) {
-    const regexp = new RegExp(`${botName}: weather`);
+    const regexp = new RegExp(`^:${botName}: weather`);
 
     if (messageText.match(regexp)) {
         return Promise.all(

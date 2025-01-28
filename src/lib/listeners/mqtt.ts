@@ -2,7 +2,7 @@ import { render } from 'ejs';
 import { dataTypes, mqttData } from "../mqtt";
 
 export async function mqttListener(messageText: string, botName: string) {
-    const regexp = new RegExp(`${botName}: (${dataTypes.join('|')})`, 'g');
+    const regexp = new RegExp(`^:${botName}: (${dataTypes.join('|')})`, 'g');
     const [...matches] = messageText.matchAll(regexp)
 
     if (matches.length !== 0) {
