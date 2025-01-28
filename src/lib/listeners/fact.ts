@@ -5,7 +5,7 @@ interface Database {
 }
 
 export async function factListener(messageText: string, botName: string) {
-    const forgetFactRegex = new RegExp(`${botName}: forget that (.*?) is (.*)`);
+    const forgetFactRegex = new RegExp(`:${botName}: forget that (.*?) is (.*)`);
     const forgetFactMatched = messageText.match(forgetFactRegex);
 
     if (forgetFactMatched) {
